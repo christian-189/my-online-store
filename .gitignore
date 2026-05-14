@@ -1,0 +1,6 @@
+.env
+node_modules/
+my-shop-react/node_modules/
+my-shop-react/build/
+.DS_Store
+makeAdmin.js
