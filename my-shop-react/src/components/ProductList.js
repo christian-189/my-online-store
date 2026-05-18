@@ -1,106 +1,55 @@
-import { useState, useEffect } from "react";
+// Author: Christian Gewehr
+// ProductList.js – Fetches the product catalogue from the backend and displays
+// it as a grid of product cards. Live search filters the list in real-time
+// using controlled input state without requiring additional backend calls,
+// since all products are already loaded into memory on mount.
+// useState is used for products, search, and loading state separately to keep
+// each concern isolated and re-renders minimal.
 
-const allProducts = [
-  {
-    id: 1,
-    name: "Beach towel",
-    price: 19.99,
-    img: "/pics/beach/towel.jpg",
-    features: [
-      "Perfect towel for sunny beach days",
-      "Keeps you sandfree",
-      "100% cotton – softer than ever before",
-      "Safe for kids; no chemicals used."
-    ]
-  },
-  {
-    id: 2,
-    name: "Cowboy hat",
-    price: 19.99,
-    img: "/pics/beach/hat.jpg",
-    features: ["A stylish must-have", "Keeps your head cool", "100% cowboy vibes", "Aussie made"]
-  },
-  {
-    id: 3,
-    name: "Drinking bottle",
-    price: 9.99,
-    img: "/pics/beach/bottle.jpg",
-    features: ["Leak proof", "BPA free", "500ml capacity", "Lightweight"]
-  },
-  {
-    id: 4,
-    name: "Cutting board",
-    price: 14.99,
-    img: "/pics/kitchen/cutting_board.jpg",
-    features: ["Durable bamboo", "Perfect size", "Easy to clean", "Eco-friendly"]
-  },
-  {
-    id: 5,
-    name: "Chef's knife",
-    price: 29.99,
-    img: "/pics/kitchen/knife.jpg",
-    features: ["Razor sharp", "Ergonomic handle", "Stainless steel", "Dishwasher safe"]
-  },
-  {
-    id: 6,
-    name: "Kitchen pan",
-    price: 39.99,
-    img: "/pics/kitchen/pan.jpg",
-    features: ["Stainless steel", "Anti-stick coating", "Oven safe", "Easy to clean"]
-  },
-  {
-    id: 7,
-    name: "Kitchen scale",
-    price: 24.99,
-    img: "/pics/kitchen/scale.jpg",
-    features: ["Accurate measurements", "Tare function", "Retro design", "Your best kitchen mate"]
-  },
-  {
-    id: 8,
-    name: "Pepper mill",
-    price: 12.99,
-    img: "/pics/kitchen/pepper_mill.jpg",
-    features: ["Grinds your pepper smoothly", "Ceramic grinder", "East to handle", "Adds flavor to your dishes"]
-  },
-  {
-    id: 9,
-    name: "Garden chair",
-    price: 49.99,
-    img: "/pics/garden/chair.jpg",
-    features: ["Comfortable seating", "Weather resistant", "100% wood", "Perfect for outdoor relaxation"]
-  },
-  {
-    id: 10,
-    name: "Hammock",
-    price: 59.99,
-    img: "/pics/garden/hammock.jpg",
-    features: ["Perfect for relaxing", "Durable fabric", "Easy to set up", "Your personal paradise"]
-  }
-];
+import { useState, useEffect } from "react";
+import { BASE_URL } from "../api/cart";
 
 export default function ProductList({ addToCart }) {
+  const [products, setProducts] = useState([]);
   const [quantities, setQuantities] = useState({});
-  // ── Live search state ──────────────────────────────────────────────────────
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
+  // Fetch all products from the database on mount.
+  // useEffect with empty dependency array ensures this runs only once.
   useEffect(() => {
-    const initialQty = {};
-    allProducts.forEach(p => (initialQty[p.id] = 1));
-    setQuantities(initialQty);
+    fetch(`${BASE_URL}/products`)
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to load products.");
+        return res.json();
+      })
+      .then(data => {
+        setProducts(data);
+        const initialQty = {};
+        data.forEach(p => (initialQty[p.id] = 1));
+        setQuantities(initialQty);
+      })
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
   }, []);
 
   const handleQuantityChange = (id, value) => {
     setQuantities(prev => ({ ...prev, [id]: Math.max(1, value) }));
   };
 
-  // Filter products in real-time as the user types
-  const filtered = allProducts.filter(p =>
+  // Filter products in real-time as the user types.
+  // toLowerCase() on both sides makes the search case-insensitive.
+  const filtered = products.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  if (loading) return <p className="product-status">Loading products...</p>;
+  if (error)   return <p className="product-status api-error">{error}</p>;
+
   return (
     <div className="product-list-wrapper">
-      {/* ── Search bar ──────────────────────────────────────────────────── */}
+      {/* Live search bar */}
       <div className="search-bar-container">
         <input
           type="text"
@@ -109,21 +58,21 @@ export default function ProductList({ addToCart }) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        {/* Clear button only appears when the search field is non-empty */}
         {search && (
           <button className="search-clear" onClick={() => setSearch("")}>✕</button>
         )}
       </div>
 
-      {/* ── No results message ──────────────────────────────────────────── */}
       {filtered.length === 0 && (
         <p className="search-no-results">No products found for "{search}".</p>
       )}
 
-      {/* ── Product grid ────────────────────────────────────────────────── */}
       <div className="product-grid">
         {filtered.map(item => (
           <div key={item.id} className="product-card">
             <div className="product-top">
+              {/* alt text provided for accessibility */}
               <img src={item.img} alt={item.name} className="product-img" />
               <div className="product-infos">
                 <h3>{item.name}</h3>
