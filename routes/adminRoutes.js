@@ -1,5 +1,8 @@
-/* Admin routes – only accessible with a valid JWT where isAdmin === true.
-   GET /admin/carts  → returns all users with their shopping cart contents. */
+// Author: Christian Gewehr
+// adminRoutes.js – Admin-only routes, protected by verifyToken middleware
+// applied in testServer.js. An additional isAdmin check here follows the
+// principle of defence in depth: even if the middleware is misconfigured,
+// non-admin users cannot access these routes.
 
 const express = require("express");
 
@@ -8,8 +11,7 @@ module.exports = function (db) {
   const users = db.collection("users");
   const carts = db.collection("carts");
 
-  // Middleware: block non-admins at the route level (belt-and-suspenders on top
-  // of the verifyToken middleware already applied in testServer.js)
+  // Secondary admin guard on top of verifyToken middleware.
   router.use((req, res, next) => {
     if (!req.isAdmin) {
       return res.status(403).json({ error: "Admin access required." });
@@ -17,18 +19,18 @@ module.exports = function (db) {
     next();
   });
 
-  // GET /admin/carts – all users + their cart items
+  // GET /admin/carts – returns all users merged with their cart contents.
+  // The password field is excluded from the projection for security.
   router.get("/carts", async (req, res) => {
     try {
-      // Fetch all users (exclude password field)
       const allUsers = await users
         .find({}, { projection: { password: 0 } })
         .toArray();
 
-      // Fetch all carts
       const allCarts = await carts.find({}).toArray();
 
-      // Merge: attach cart items to each user
+      // Merge users and carts in memory to avoid multiple round-trips
+      // to the database or a complex aggregation pipeline.
       const result = allUsers.map(user => {
         const cart = allCarts.find(c => c.userId === user._id.toString());
         return {

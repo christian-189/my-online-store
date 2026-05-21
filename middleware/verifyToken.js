@@ -1,13 +1,16 @@
-/* Middleware to verify JWT token on protected routes.
-   Usage: add verifyToken as middleware to any route that requires authentication.
-   The decoded userId is attached to req.userId for use in route handlers. */
+// Author: Christian Gewehr
+// verifyToken.js – Express middleware that verifies the JWT on protected routes.
+// By centralising auth in a middleware function, all protected routes
+// automatically reject unauthenticated requests without repeating the logic.
+// The decoded userId and isAdmin flag are attached to the request object
+// so route handlers can use them without decoding the token again.
 
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_change_in_production";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 function verifyToken(req, res, next) {
-  // Expect header: Authorization: Bearer <token>
+  // JWT is expected as a Bearer token in the Authorization header (RFC 6750).
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
@@ -21,6 +24,7 @@ function verifyToken(req, res, next) {
     req.isAdmin = decoded.isAdmin || false;
     next();
   } catch (err) {
+    // jwt.verify throws if the token is invalid or expired.
     return res.status(403).json({ error: "Invalid or expired token." });
   }
 }
