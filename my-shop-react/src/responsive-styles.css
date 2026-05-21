@@ -1,0 +1,101 @@
+/* ── Add these rules to your style.css ── */
+
+/* ── Responsiveness ──────────────────────────────────────────────────────── */
+
+/* Tablet: Stack cart below products */
+@media (max-width: 900px) {
+    .grid-container {
+      grid-template-columns: 1fr;
+    }
+  
+    .column-cart {
+      position: static;
+      height: auto;
+      max-height: none;
+      width: 100%;
+    }
+  }
+  
+  /* Mobile: Tighten up cart items */
+  @media (max-width: 600px) {
+    .cart-item {
+      grid-template-columns: 1fr 40px 70px 55px;
+      gap: 6px;
+      font-size: 0.85rem;
+    }
+  
+    .product-card {
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+  
+    header {
+      padding: 12px 1rem;
+    }
+  
+    .header-nav {
+      right: 0.75rem;
+    }
+  }
+  
+  /* ── Button active states ─────────────────────────────────────────────────── */
+  
+  /* Add to Cart */
+  .product-card button:active {
+    background-color: #004a99;
+    transform: scale(0.97);
+  }
+  
+  /* Checkout */
+  .checkout-btn:active {
+    background-color: #003d80;
+    transform: scale(0.97);
+  }
+  
+  /* Remove */
+  .remove-btn:active {
+    background-color: #990000;
+    transform: scale(0.97);
+  }
+  
+  /* Auth form buttons */
+  .auth-form button:active {
+    background-color: #111;
+    transform: scale(0.97);
+  }
+  
+  /* Admin buttons */
+  .admin-save-btn:active {
+    background-color: #111;
+    transform: scale(0.97);
+  }
+  
+  .admin-delete-btn:active {
+    background: #e74c3c;
+    color: #fff;
+    transform: scale(0.97);
+  }
+  
+  /* ── Toast notification ───────────────────────────────────────────────────── */
+  
+  .toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.82);
+    color: #fff;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    z-index: 9999;
+    pointer-events: none;
+    animation: fadeInOut 3s ease forwards;
+  }
+  
+  @keyframes fadeInOut {
+    0%   { opacity: 0; transform: translate(-50%, -48%); }
+    15%  { opacity: 1; transform: translate(-50%, -50%); }
+    75%  { opacity: 1; }
+    100% { opacity: 0; }
+  }

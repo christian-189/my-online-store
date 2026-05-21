@@ -1,0 +1,133 @@
+/* ── Add these rules to your existing style.css ── */
+
+/* Auth pages (Login & Register) */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 2rem;
+}
+
+.auth-box {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 2.5rem 3rem;
+  width: 100%;
+  max-width: 420px;
+}
+
+.auth-box h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.6rem;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.auth-form input {
+  padding: 0.7rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.auth-form button {
+  padding: 0.75rem;
+  background: #333;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.auth-form button:hover {
+  background: #555;
+}
+
+.auth-error {
+  color: #c0392b;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.auth-success {
+  color: #27ae60;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.auth-switch {
+  margin-top: 1.2rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.auth-switch a {
+  color: #333;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* Header nav */
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-username {
+  font-size: 0.95rem;
+  color: #eee;
+}
+
+.nav-link {
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.95rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.nav-logout-btn {
+  background: transparent;
+  color: #fff;
+  border: 1px solid #fff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+
+.nav-logout-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Login prompt inside the cart for guest users */
+.cart-login-prompt {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.6;
+}
+
+.cart-login-prompt a {
+  color: #333;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.cart-login-prompt a:hover {
+  color: #000;
+}
