@@ -5,21 +5,37 @@
 // following industry practice (e.g. Amazon, ASOS) where browsing is public
 // but purchasing requires an account.
 
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { isLoggedIn } from "../api/cart";
 
 export default function Cart({ items, updateQuantity, removeItem, className }) {
+  // Controls the checkout notification toast.
+  // useState is used instead of useRef because showing/hiding the toast
+  // must trigger a re-render.
+  const [showToast, setShowToast] = useState(false);
+
   // Total is derived directly from the items array on every render.
   // No separate state is needed since total always depends on items.
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
+  const handleCheckout = () => {
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
+
   return (
     <aside className={`column-cart ${className || ""}`}>
+      {/* Checkout notification – appears in centre of screen */}
+      {showToast && (
+        <div className="toast">
+          Checkout is not available yet.
+        </div>
+      )}
+
       <div id="cart">
         <h3>Cart</h3>
         <div id="cart-items">
-          {/* Show login prompt for guests instead of an empty cart */}
           {!isLoggedIn() ? (
             <p className="cart-login-prompt">
               <Link to="/login">Login</Link> or <Link to="/register">register</Link> to start shopping.
@@ -56,7 +72,11 @@ export default function Cart({ items, updateQuantity, removeItem, className }) {
 
       <div className="cart-footer">
         <p>Total: ${total.toFixed(2)}</p>
-        <button className="checkout-btn" disabled={!isLoggedIn() || items.length === 0}>
+        <button
+          className="checkout-btn"
+          onClick={handleCheckout}
+          disabled={!isLoggedIn() || items.length === 0}
+        >
           Checkout
         </button>
       </div>

@@ -17,7 +17,7 @@ export default function Header({ user, onLogout }) {
 
   return (
     <header>
-      <h1>My Online Store</h1>
+      <Link to="/" className="site-title-link">My Online Store</Link>
       <nav className="header-nav">
         {user ? (
           <>
