@@ -29,13 +29,13 @@ import {
 // PrivateRoute redirects unauthenticated users to /login.
 // Used only for admin route – the shop is publicly browsable.
 function PrivateRoute({ children }) {
-  return isLoggedIn() ? children : <Navigate to="/login" replace />;
+  return isLoggedIn() ? children : <Navigate to="/" replace />;
 }
 
 // ShopPage displays the product list and cart side by side.
 // useState is used instead of useReducer because cart state is always fully
 // replaced by the API response; no action-based reducer logic is needed.
-function ShopPage({ cart, setCart }) {
+function ShopPage({ cart, setCart, user }) {
   const [cartError, setCartError] = useState("");
 
   // Load the cart from the database when the shop page mounts,
@@ -50,10 +50,6 @@ function ShopPage({ cart, setCart }) {
 
   // If user is not logged in, show a message instead of adding to cart.
   const addToCart = async (product, qty) => {
-    if (!isLoggedIn()) {
-      setCartError("Please login to add items to your cart.");
-      return;
-    }
     try {
       const newItems = await addToCartBackend({ ...product, quantity: qty });
       setCart(newItems);
@@ -82,15 +78,14 @@ function ShopPage({ cart, setCart }) {
   };
 
   return (
-    <main className="grid-container">
-      {/* Show a non-blocking error/info message instead of a blank page */}
-      {cartError && <p className="api-error">{cartError}</p>}
+    <main className="grid-container">      
       <ProductList addToCart={addToCart} />
       <Cart
         items={cart}
         updateQuantity={updateQuantity}
         removeItem={removeItem}
         className="column-cart"
+        user={user}
       />
     </main>
   );
@@ -118,7 +113,7 @@ function App() {
       <Header user={user} onLogout={handleLogout} />
       <Routes>
         {/* Public routes – accessible without a token */}
-        <Route path="/"         element={<ShopPage cart={cart} setCart={setCart} />} />
+        <Route path="/"         element={<ShopPage cart={cart} setCart={setCart} user={user} />} />
         <Route path="/login"    element={<Login onLogin={handleLogin} />} />
         <Route path="/register" element={<Register onLogin={handleLogin} />} />
 

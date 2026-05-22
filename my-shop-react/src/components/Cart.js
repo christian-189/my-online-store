@@ -4,12 +4,13 @@
 // If the user is not logged in, a prompt is shown instead of the cart,
 // following industry practice (e.g. Amazon, ASOS) where browsing is public
 // but purchasing requires an account.
+// user is passed as a prop from App instead of reading localStorage directly,
+// keeping state management consistent with the rest of the application.
 
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { isLoggedIn } from "../api/cart";
 
-export default function Cart({ items, updateQuantity, removeItem, className }) {
+export default function Cart({ items, updateQuantity, removeItem, className, user }) {
   // Controls the checkout notification toast.
   // useState is used instead of useRef because showing/hiding the toast
   // must trigger a re-render.
@@ -36,7 +37,8 @@ export default function Cart({ items, updateQuantity, removeItem, className }) {
       <div id="cart">
         <h3>Cart</h3>
         <div id="cart-items">
-          {!isLoggedIn() ? (
+          {/* Show login prompt for guests instead of an empty cart */}
+          {!user ? (
             <p className="cart-login-prompt">
               <Link to="/login">Login</Link> or <Link to="/register">register</Link> to start shopping.
             </p>
@@ -75,7 +77,7 @@ export default function Cart({ items, updateQuantity, removeItem, className }) {
         <button
           className="checkout-btn"
           onClick={handleCheckout}
-          disabled={!isLoggedIn() || items.length === 0}
+          disabled={!user || items.length === 0}
         >
           Checkout
         </button>
