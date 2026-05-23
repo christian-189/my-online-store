@@ -3,6 +3,8 @@
 // All routes are protected by the verifyToken middleware applied in testServer.js.
 // The cart is stored as a single document per user containing an array of items,
 // which suits MongoDB's document model and avoids joins across collections.
+// userId is taken from req.userId (set by verifyToken) instead of req.body,
+// preventing users from manipulating other users' carts by sending a fake userId.
 
 const express = require("express");
 
@@ -16,7 +18,8 @@ module.exports = function (db) {
   // creating a duplicate entry.
   router.post("/", async (req, res) => {
     try {
-      const { userId, items: newItems } = req.body;
+      const userId = req.userId; // extracted from JWT by verifyToken middleware
+      const { items: newItems } = req.body;
       const cart = await carts.findOne({ userId });
       let items = cart?.items || [];
 
@@ -33,10 +36,10 @@ module.exports = function (db) {
     }
   });
 
-  // READ – GET /cart/:userId
-  router.get("/:userId", async (req, res) => {
+  // READ – GET /cart
+  router.get("/", async (req, res) => {
     try {
-      const { userId } = req.params;
+      const userId = req.userId;
       const cart = await carts.findOne({ userId });
       res.json({ items: cart?.items || [] });
     } catch (err) {
@@ -44,10 +47,11 @@ module.exports = function (db) {
     }
   });
 
-  // UPDATE quantity – PUT /cart/:userId/:id
-  router.put("/:userId/:id", async (req, res) => {
+  // UPDATE quantity – PUT /cart/:id
+  router.put("/:id", async (req, res) => {
     try {
-      const { userId, id } = req.params;
+      const userId = req.userId;
+      const { id } = req.params;
       const { quantity } = req.body;
 
       const cart = await carts.findOne({ userId });
@@ -64,10 +68,12 @@ module.exports = function (db) {
     }
   });
 
-  // DELETE item – DELETE /cart/:userId/:id
-  router.delete("/:userId/:id", async (req, res) => {
+  // DELETE item – DELETE /cart/:id
+  router.delete("/:id", async (req, res) => {
     try {
-      const { userId, id } = req.params;
+      const userId = req.userId;
+      const { id } = req.params;
+
       const cart = await carts.findOne({ userId });
       if (!cart) return res.status(404).json({ error: "Cart not found" });
 

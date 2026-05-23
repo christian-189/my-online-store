@@ -67,29 +67,25 @@ export async function loginUser(email, password) {
 
 // ── CART HELPERS ──────────────────────────────────────────────────────────────
 
-// Builds the Authorization header required by all protected cart routes.
+// Builds the Authorization header required by all protected routes.
+// Exported so other components (e.g. AdminDashboard) can reuse it
+// without duplicating the logic.
 // JWT is sent as a Bearer token as per the RFC 6750 standard.
-function authHeaders() {
+export function authHeaders() {
   return {
     "Content-Type": "application/json",
     Authorization: `Bearer ${getToken()}`,
   };
 }
 
-// Retrieves the userId from the stored user object.
-// Throws an error if no user is logged in, preventing unauthenticated requests.
-function getUserId() {
-  const user = getUser();
-  if (!user) throw new Error("Not logged in.");
-  return user.userId;
-}
-
 // ── CART API CALLS ────────────────────────────────────────────────────────────
+// userId is no longer sent from the frontend – the backend extracts it
+// from the JWT via the verifyToken middleware. This prevents users from
+// manipulating other users' carts by sending a fake userId.
 
-// GET /cart/:userId – loads the current user's cart from the database.
+// GET /cart – loads the current user's cart from the database.
 export async function loadCartBackend() {
-  const userId = getUserId();
-  const res = await fetch(`${BASE_URL}/cart/${userId}`, {
+  const res = await fetch(`${BASE_URL}/cart`, {
     headers: authHeaders(),
   });
   if (!res.ok) throw new Error("Failed to load cart.");
@@ -100,21 +96,19 @@ export async function loadCartBackend() {
 // POST /cart – adds one or more items to the cart.
 // The backend merges the new items with any existing ones.
 export async function addToCartBackend(product) {
-  const userId = getUserId();
   const res = await fetch(`${BASE_URL}/cart`, {
     method: "POST",
     headers: authHeaders(),
-    body: JSON.stringify({ userId, items: [product] }),
+    body: JSON.stringify({ items: [product] }),
   });
   if (!res.ok) throw new Error("Failed to add item to cart.");
   const data = await res.json();
   return data.items || [];
 }
 
-// PUT /cart/:userId/:id – updates the quantity of a specific cart item.
+// PUT /cart/:id – updates the quantity of a specific cart item.
 export async function updateCartQuantityBackend(id, quantity) {
-  const userId = getUserId();
-  const res = await fetch(`${BASE_URL}/cart/${userId}/${id}`, {
+  const res = await fetch(`${BASE_URL}/cart/${id}`, {
     method: "PUT",
     headers: authHeaders(),
     body: JSON.stringify({ quantity }),
@@ -124,10 +118,9 @@ export async function updateCartQuantityBackend(id, quantity) {
   return data.items || [];
 }
 
-// DELETE /cart/:userId/:id – removes a specific item from the cart entirely.
+// DELETE /cart/:id – removes a specific item from the cart entirely.
 export async function removeFromCartBackend(id) {
-  const userId = getUserId();
-  const res = await fetch(`${BASE_URL}/cart/${userId}/${id}`, {
+  const res = await fetch(`${BASE_URL}/cart/${id}`, {
     method: "DELETE",
     headers: authHeaders(),
   });
